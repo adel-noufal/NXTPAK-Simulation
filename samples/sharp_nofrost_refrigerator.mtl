@@ -1,0 +1,21 @@
+# Material Library for Sharp No-Frost Inverter Refrigerator 450L
+newmtl Refrigerator_Silver_Steel
+Ka 0.2 0.2 0.2
+Kd 0.88 0.90 0.93
+Ks 0.5 0.5 0.5
+Ns 75.0
+illum 2
+
+newmtl Refrigerator_Dark_Accent
+Ka 0.1 0.1 0.1
+Kd 0.18 0.20 0.24
+Ks 0.3 0.3 0.3
+Ns 40.0
+illum 2
+
+newmtl Inverter_Compressor_Mat
+Ka 0.1 0.1 0.1
+Kd 0.12 0.12 0.12
+Ks 0.1 0.1 0.1
+Ns 10.0
+illum 1

@@ -1,0 +1,19 @@
+# Python cache & test artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.test-tmp-repair/
+.test-tmp-repair2/
+tmp_pytest/
+*.log
+
+# OS & Editor artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~
+

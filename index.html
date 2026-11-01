@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NXTPAK Studio | Generative AI & 3D Digital Twin for Circular Packaging</title>
+  <meta name="description" content="AI Generative Design & 3D Digital Twin Drop-Test Simulation for Elaraby Group replacing toxic EPS Styrofoam with circular honeycomb origami cardboard.">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cad: {
+              bg: '#070b12',
+              card: '#0d1522',
+              border: '#1e293b',
+              accent: '#06b6d4'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Inter, JetBrains Mono, Cairo & Tajawal for Arabic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Custom Industrial CAD Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Three.js & OrbitControls via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- Three.js 3D CAD Loaders (OBJ, GLTF, STL) via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#070b12] text-slate-100 flex flex-col h-screen overflow-hidden antialiased">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="h-14 border-b border-slate-800/90 bg-[#0b121e]/90 backdrop-blur-md px-3 sm:px-4 flex items-center justify-between shrink-0 z-30 select-none">
+    <!-- Brand / Title -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <i data-lucide="box" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <span class="font-bold text-sm sm:text-base tracking-tight text-white flex items-center gap-1">
+            <span data-i18n="appTitle">NXTPAK</span>
+            <span class="text-cyan-400 font-light" data-i18n="appTitleSuffix">STUDIO</span>
+          </span>
+          <span class="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/50">v4.2 AI-CAD</span>
+        </div>
+        <p class="text-[10px] text-slate-400 font-mono hidden xl:block" data-i18n="appSub">Generative AI &amp; 3D Digital Twin • Circular Structural Packaging</p>
+      </div>
+    </div>
+
+    <!-- Official Hackathon Partnerships Badge -->
+    <div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-800 text-xs">
+      <span class="text-slate-400" data-i18n="badgePartners">Co-Engineered for:</span>
+      <span class="font-semibold text-emerald-400">DMZ Cairo</span>
+      <span class="text-slate-600">•</span>
+      <span class="font-semibold text-sky-400">Elaraby Group</span>
+      <span class="text-slate-600">•</span>
+      <span class="font-semibold text-amber-400">Photon X</span>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Bilingual Language Switcher (AR / EN) -->
+      <button id="btn-toggle-lang" class="px-2.5 py-1.5 rounded-md bg-cyan-950/70 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-700/60 font-bold text-xs flex items-center gap-1 transition-all" title="Switch Language / تبديل اللغة">
+        <i data-lucide="languages" class="w-3.5 h-3.5"></i>
+        <span>العربية</span>
+      </button>
+
+      <!-- Upload Custom 3D CAD Model Button -->
+      <button id="btn-open-upload" class="px-2.5 py-1.5 rounded-md bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-mono text-xs flex items-center gap-1.5 shadow-md shadow-blue-900/40 transition-all">
+        <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-cyan-300"></i>
+        <span class="hidden sm:inline" data-i18n="uploadBtn">Upload 3D Model</span>
+      </button>
+
+      <!-- A/B Benchmark Comparison Button -->
+      <button id="btn-open-benchmark" class="hidden sm:flex px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-mono text-xs items-center gap-1.5 transition-colors">
+        <i data-lucide="split" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span class="hidden md:inline" data-i18n="compareBtn">A/B Benchmark</span>
+      </button>
+
+      <!-- AR & Factory Floor Mode Button -->
+      <button id="btn-open-ar" class="px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-mono text-xs flex items-center gap-1.5 transition-colors">
+        <i data-lucide="view" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span class="hidden md:inline" data-i18n="arBtn">AR Floor</span>
+      </button>
+
+      <!-- 2D Dieline Button -->
+      <button id="btn-view-dieline" class="px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-mono text-xs flex items-center gap-1.5 transition-colors">
+        <i data-lucide="file-code" class="w-3.5 h-3.5 text-cyan-400"></i>
+        <span class="hidden md:inline" data-i18n="dielineBtn">2D CAD</span>
+      </button>
+
+      <!-- Export Report Button -->
+      <button id="btn-open-report" class="hidden sm:flex px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-mono text-xs items-center gap-1.5 transition-colors">
+        <i data-lucide="file-text" class="w-3.5 h-3.5 text-sky-400"></i>
+        <span class="hidden md:inline" data-i18n="reportBtn">Report</span>
+      </button>
+
+      <!-- 3D CAD Mesh Export Button -->
+      <button id="btn-export-cad" class="p-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" title="Export 3D CAD .OBJ Mesh">
+        <i data-lucide="box" class="w-4 h-4 text-purple-400"></i>
+      </button>
+
+      <!-- Pitch Mode Demo Button -->
+      <button id="btn-pitch-mode" class="px-3 py-1.5 rounded-md bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 hover:from-amber-400 hover:to-orange-500 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all active:scale-95">
+        <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+        <span data-i18n="pitchDemo">Pitch Demo</span>
+      </button>
+
+      <!-- Pitch Deck & BMC Presentation Button -->
+      <a href="presentation.html" target="_blank" class="px-2.5 py-1.5 rounded-md bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-mono text-xs flex items-center gap-1.5 shadow-md shadow-emerald-700/30 transition-all" title="Open Interactive Pitch Deck & Business Model Canvas">
+        <i data-lucide="presentation" class="w-3.5 h-3.5 text-emerald-200"></i>
+        <span class="hidden lg:inline" data-i18n="presentationBtn">Pitch Deck &amp; BMC</span>
+      </a>
+
+      <!-- Audio Mute Toggle -->
+      <button id="btn-toggle-audio" class="p-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" title="Toggle Sound FX">
+        <i data-lucide="volume-2" class="w-4 h-4 text-cyan-400"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- PITCH MODE BANNER OVERLAY -->
+  <div id="pitch-banner" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-amber-500/90 text-slate-950 px-4 py-1.5 rounded-full font-mono text-xs font-bold shadow-xl shadow-amber-500/20 flex items-center gap-2 animate-bounce">
+    <span class="w-2 h-2 rounded-full bg-slate-950 animate-ping"></span>
+    <span data-i18n="pitchBanner">LIVE PITCH DEMO RUNNING: Automated Generative AI &amp; ISTA-1A Drop Simulation</span>
+  </div>
+
+  <!-- UPLOAD SUCCESS TOAST -->
+  <div id="upload-success-toast" class="hidden absolute top-16 right-4 z-40 bg-emerald-950/90 border border-emerald-500 text-emerald-200 px-4 py-2.5 rounded-lg font-mono text-xs shadow-2xl backdrop-blur-md"></div>
+
+  <!-- MAIN WORKSPACE GRID -->
+  <div class="flex-1 grid grid-cols-12 overflow-hidden relative">
+
+    <!-- ========================================== -->
+    <!-- 1. LEFT SIDEBAR: PARAMETERS & AI GENERATOR -->
+    <!-- ========================================== -->
+    <aside class="col-span-12 md:col-span-4 lg:col-span-3 bg-[#0a101c]/95 border-r border-slate-800/80 flex flex-col h-full overflow-y-auto p-4 z-20 space-y-4 shadow-xl">
+      
+      <!-- Section: Preset Appliance Selection -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-semibold text-slate-300 tracking-wide uppercase font-mono flex items-center gap-1.5">
+            <i data-lucide="tv" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span data-i18n="presetsTitle">Elaraby Appliance Presets</span>
+          </label>
+          <span class="text-[10px] text-slate-500 font-mono" data-i18n="presetsCatalog">Factory Catalog</span>
+        </div>
+        <select id="preset-select" class="w-full bg-slate-900 border border-slate-700 rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono">
+          <option value="tv">📺 Tornado 55" 4K Smart TV (14.5 kg)</option>
+          <option value="microwave">📻 Sharp Inverter Microwave 34L (16.0 kg)</option>
+          <option value="blender">🌪️ Tornado Stand Blender 1.5L (4.2 kg)</option>
+          <option value="custom">⚙️ Custom / Uploaded 3D Model</option>
+        </select>
+
+        <!-- Quick Upload Button in Sidebar -->
+        <button id="btn-open-upload-side" class="w-full py-1.5 px-2.5 rounded bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-[11px] font-mono text-cyan-400 flex items-center justify-center gap-1.5 transition-colors">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+          <span data-i18n="uploadDropzoneTitle">Upload Custom 3D CAD Model</span>
+        </button>
+      </div>
+
+      <!-- Section: Appliance Dimensional & Fragility Sliders -->
+      <div class="p-3 rounded-lg bg-slate-900/60 border border-slate-800/80 space-y-3">
+        <div class="flex items-center justify-between text-xs text-slate-400 font-mono border-b border-slate-800 pb-1.5">
+          <span data-i18n="specsTitle">Physical Specifications</span>
+          <span class="text-cyan-400" data-i18n="specsSub">CAD Dimensions</span>
+        </div>
+
+        <!-- Length -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-mono">
+            <span class="text-slate-400" data-i18n="dimLength">Length (X):</span>
+            <span id="val-length" class="text-cyan-400 font-bold">1230 mm</span>
+          </div>
+          <input type="range" id="slider-length" min="150" max="1800" step="10" value="1230" class="w-full">
+        </div>
+
+        <!-- Width (Depth) -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-mono">
+            <span class="text-slate-400" data-i18n="dimWidth">Width / Depth (Z):</span>
+            <span id="val-width" class="text-cyan-400 font-bold">80 mm</span>
+          </div>
+          <input type="range" id="slider-width" min="50" max="800" step="10" value="80" class="w-full">
+        </div>
+
+        <!-- Height -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-mono">
+            <span class="text-slate-400" data-i18n="dimHeight">Height (Y):</span>
+            <span id="val-height" class="text-cyan-400 font-bold">710 mm</span>
+          </div>
+          <input type="range" id="slider-height" min="100" max="1200" step="10" value="710" class="w-full">
+        </div>
+
+        <!-- Weight / Mass (Fully interactive Slider + Direct Number Input) -->
+        <div class="space-y-1">
+          <div class="flex justify-between items-center text-xs font-mono">
+            <span class="text-slate-400" data-i18n="dimWeight">Appliance Mass:</span>
+            <div class="flex items-center gap-1">
+              <input type="number" id="input-weight" min="0.5" max="250" step="0.5" value="14.5" class="w-16 px-1.5 py-0.5 rounded bg-slate-950 border border-amber-500/50 text-amber-400 font-bold text-right text-xs focus:border-amber-400 focus:outline-none">
+              <span class="text-amber-400 font-bold text-xs">kg</span>
+            </div>
+          </div>
+          <input type="range" id="slider-weight" min="0.5" max="150" step="0.5" value="14.5" class="w-full">
+        </div>
+
+        <!-- Fragility Index -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-mono">
+            <span class="text-slate-400" data-i18n="dimFragility">Fragility Index:</span>
+            <span id="val-fragility" class="text-emerald-400 font-bold">8.5 / 10</span>
+          </div>
+          <input type="range" id="slider-fragility" min="1" max="10" step="0.5" value="8.5" class="w-full">
+          <div class="flex justify-between text-[9px] text-slate-500 font-mono">
+            <span data-i18n="fragileRugged">Rugged (50G)</span>
+            <span data-i18n="fragileOLED">Ultra-Fragile OLED (25G)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Product Enclosure Material Selector -->
+      <div class="p-3 rounded-lg bg-slate-900/60 border border-slate-800/80 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-semibold text-slate-300 tracking-wide uppercase font-mono flex items-center gap-1.5">
+            <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span data-i18n="productMaterialTitle">Product Enclosure Material</span>
+          </label>
+          <span class="text-[10px] text-amber-400 font-mono" id="current-prod-mat-tag" data-i18n="productMaterialSub">Sheet Metal & Polymers</span>
+        </div>
+
+        <select id="product-material-select" class="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors font-mono">
+          <option value="sheet_metal_steel">⚙️ Cold-Rolled Sheet Steel (0.8mm صاج مدرفل)</option>
+          <option value="stainless_steel">✨ Brushed Stainless Steel (AISI 304 ستانلس)</option>
+          <option value="abs_polymer">🛡️ High-Impact ABS Plastic (بلاستيك ABS)</option>
+          <option value="polycarbonate">💎 Reinforced Polycarbonate PC (بولي كربونات)</option>
+          <option value="tempered_glass" selected>📺 Tempered Glass & OLED (زجاج مقسى/شاشات)</option>
+          <option value="die_cast_aluminum">🔩 Die-Cast Aluminum Alloy (سبائك ألومنيوم A380)</option>
+          <option value="polypropylene">📦 Structural Polypropylene PP (بولي بروبيلين مرن)</option>
+        </select>
+
+        <!-- Quick Material Mechanical Properties Badge / Card -->
+        <div id="product-material-info-card" class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80 text-[10px] font-mono space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400" data-i18n="prodMatYield">Yield Strength:</span>
+            <span id="prod-mat-yield-val" class="text-amber-300 font-bold">120 MPa</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400" data-i18n="prodMatFailure">Failure Mode:</span>
+            <span id="prod-mat-failure-val" class="text-sky-300 font-bold">Spiderweb Shatter (تهشم عنكبوتي)</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400" data-i18n="prodMatUsage">Typical Appliance:</span>
+            <span id="prod-mat-usage-val" class="text-slate-300 truncate max-w-[150px]">Tornado 55" TV Screens</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Packaging Material Selector -->
+      <div class="space-y-2">
+        <label class="text-xs font-semibold text-slate-300 tracking-wide uppercase font-mono flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span data-i18n="materialTitle">Packaging Material</span>
+          </span>
+          <span class="text-[10px] text-cyan-400" data-i18n="materialSub">Circular vs EPS</span>
+        </label>
+
+        <div class="space-y-2">
+          <!-- 1. Generative Honeycomb Cardboard -->
+          <div data-material="honeycomb" class="p-2.5 rounded-lg border border-cyan-500 bg-cyan-950/30 hover:border-cyan-400 cursor-pointer transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span data-i18n="matHoneycomb">Honeycomb Cardboard</span>
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono" data-i18n="matHoneycombTag">Optimal</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1" data-i18n="matHoneycombDesc">15mm hexagonal kraft paperboard cells. 35% less mass, 100% recyclable in Egypt.</p>
+          </div>
+
+          <!-- 2. Origami Folded Flute -->
+          <div data-material="origami" class="p-2.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900/60 cursor-pointer transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                <span data-i18n="matOrigami">Origami Folded Flute</span>
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono" data-i18n="matOrigamiTag">Ultra-Light</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1" data-i18n="matOrigamiDesc">Miura-ori 3D folded geometry. Zero-glue interlocking tabs.</p>
+          </div>
+
+          <!-- 3. Molded Agricultural Pulp -->
+          <div data-material="pulp" class="p-2.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900/60 cursor-pointer transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span data-i18n="matPulp">Molded Rice Straw Pulp</span>
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono" data-i18n="matPulpTag">Nile Delta</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1" data-i18n="matPulpDesc">Upcycled Egyptian agricultural straw fibers. Solves local seasonal pollution.</p>
+          </div>
+
+          <!-- 4. Traditional EPS Styrofoam Baseline -->
+          <div data-material="eps" class="p-2.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900/60 cursor-pointer transition-all opacity-80">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                <span data-i18n="matEPS">EPS Styrofoam</span>
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 font-mono" data-i18n="matEPSTag">Baseline (Toxic)</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1" data-i18n="matEPSDesc">Expanded Polystyrene. Non-biodegradable (500 yrs in Egyptian landfills).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed packaging specification -->
+      <section class="space-y-2 rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+        <h3 class="text-xs font-bold text-cyan-300" data-i18n="packSpecTitle">Carton & cushioning specification</h3>
+        <p class="text-[10px] text-slate-500" data-i18n="packSpecHelp">Dimensions in mm. These values are included in the post-test report.</p>
+        <div class="grid grid-cols-3 gap-2">
+          <label class="text-[10px] text-slate-400">L <input id="pack-length" type="number" min="1" class="mt-1 w-full rounded bg-slate-950 border border-slate-700 p-1.5 text-white" value="900"></label>
+          <label class="text-[10px] text-slate-400">W <input id="pack-width" type="number" min="1" class="mt-1 w-full rounded bg-slate-950 border border-slate-700 p-1.5 text-white" value="500"></label>
+          <label class="text-[10px] text-slate-400">H <input id="pack-height" type="number" min="1" class="mt-1 w-full rounded bg-slate-950 border border-slate-700 p-1.5 text-white" value="500"></label>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="text-[10px] text-slate-400" data-i18n="cushionThickness">Cushion thickness (mm)<input id="pack-cushion" type="number" min="0" step="1" value="40" class="mt-1 w-full rounded bg-slate-950 border border-slate-700 p-1.5 text-white"></label>
+          <label class="text-[10px] text-slate-400" data-i18n="cushionAmount">Cushion pieces<input id="pack-quantity" type="number" min="0" max="8" step="1" value="8" class="mt-1 w-full rounded bg-slate-950 border border-slate-700 p-1.5 text-white"></label>
+        </div>
+        <label class="text-[10px] text-slate-400" data-i18n="partitionLayout">Carton partition / layout
+          <select id="pack-layout" class="mt-1 w-full rounded bg-slate-950 border border-slate-700 p-1.5 text-white">
+            <option value="top_tray" data-i18n="layoutTopTray">Top Accessory Tray (Remote, Cables &amp; Manual)</option>
+            <option value="open_8corners" data-i18n="layoutOpenCorners">8 Corner Cushions + Open Cavity (Standard Clean)</option>
+            <option value="side_bay" data-i18n="layoutSideBay">Side Accessory Bay (Pedestal Stand &amp; Brackets)</option>
+            <option value="edge_rails" data-i18n="layoutEdgeRails">Perimeter Edge Protective Rails (Clamp &amp; Strap Guard)</option>
+            <option value="base_skid_tray" data-i18n="layoutBaseTray">Heavy-Duty Base Cushion Tray (Pallet &amp; Forklift Guard)</option>
+          </select>
+        </label>
+        <label class="text-[10px] text-slate-400">Partition notes<input id="pack-notes" type="text" placeholder="Extra inserts or compartment notes" class="mt-1 w-full rounded bg-slate-950 border border-slate-700 p-1.5 text-white"></label>
+        <p id="pack-volume-estimate" class="text-[10px] text-emerald-300">Estimated outer volume: 225.00 L</p>
+      </section>
+
+      <!-- Action Button: Run AI Generative Optimization -->
+      <div class="pt-2">
+        <button id="btn-run-ai" class="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-cyan-600 via-sky-500 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-cyan-600/30 transition-all transform active:scale-98">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-300 animate-spin"></i>
+          <span data-i18n="runAIBtn">Run AI Generative Design</span>
+        </button>
+        <p class="text-[10px] text-center text-slate-500 mt-1.5 font-mono" data-i18n="runAISub">Synthesizes FEA Origami Topology &amp; Cushion Lattice</p>
+      </div>
+    </aside>
+
+    <!-- ================================================= -->
+    <!-- 2. CENTER: 3D DIGITAL TWIN & DROP-TEST SIMULATION -->
+    <!-- ================================================= -->
+    <main class="col-span-12 md:col-span-8 lg:col-span-6 flex flex-col h-full relative overflow-hidden bg-[#070b12]">
+      
+      <!-- 3D Three.js WebGL Viewport Container -->
+      <div id="cad-viewport" class="w-full h-full cursor-grab active:cursor-grabbing relative">
+        <!-- High-Impact Vignette Trauma Flash Overlay -->
+        <div id="viewport-impact-vignette" class="pointer-events-none absolute inset-0 opacity-0 z-30 transition-opacity duration-150"></div>
+      </div>
+
+      <!-- Interactive 3D FEA Stress Probe Tooltip (Appears when hovering on buffer caps) -->
+      <div id="cad-stress-probe" class="hidden absolute z-30 p-2.5 rounded-lg bg-slate-900/90 border border-cyan-500/60 shadow-xl pointer-events-none backdrop-blur-md"></div>
+
+      <!-- Floating CAD Viewport HUD Toolbar (Top Center) -->
+      <div class="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 p-1.5 rounded-lg bg-slate-900/85 backdrop-blur-md border border-slate-800 shadow-2xl">
+        <!-- Camera Presets -->
+        <div class="flex items-center gap-1 pr-2 border-r border-slate-800">
+          <button data-camera="isometric" class="px-2 py-1 rounded text-[11px] font-mono text-cyan-400 bg-slate-800 hover:bg-slate-700 transition-colors" data-i18n="camISO" title="Isometric 3D">ISO</button>
+          <button data-camera="front" class="px-2 py-1 rounded text-[11px] font-mono text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" data-i18n="camFront" title="Front View">FRONT</button>
+          <button data-camera="top" class="px-2 py-1 rounded text-[11px] font-mono text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" data-i18n="camTop" title="Top Plan">TOP</button>
+          <button data-camera="side" class="px-2 py-1 rounded text-[11px] font-mono text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" data-i18n="camSide" title="Side View">SIDE</button>
+        </div>
+
+        <!-- Wireframe Mode Toggle -->
+        <button id="btn-wireframe" class="p-1.5 rounded text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition-colors" data-i18n-title="toggleWireframe" title="Toggle Structural Wireframe">
+          <i data-lucide="grid" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Stress Heatmap Toggle -->
+        <button id="btn-heatmap" class="p-1.5 rounded text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition-colors" data-i18n-title="toggleHeatmap" title="Toggle FEA Stress Heatmap">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Calipers Toggle -->
+        <button id="btn-dimensions" class="p-1.5 rounded text-slate-400 hover:text-sky-400 hover:bg-slate-800 transition-colors" data-i18n-title="toggleCalipers" title="Toggle 3D Calipers">
+          <i data-lucide="ruler" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Cinematic Macro Impact Tracking Camera Toggle -->
+        <button id="btn-cinematic-cam" class="px-2 py-1 rounded text-[11px] font-mono text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition-colors flex items-center gap-1 border border-transparent hover:border-amber-500/40" title="Toggle Cinematic Macro Impact Tracking Cam">
+          <i data-lucide="video" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span class="hidden sm:inline" data-i18n="camCinematic">Impact Cam</span>
+        </button>
+
+        <!-- Carton Visibility Modes (Solid Sealed Box vs X-Ray Inside vs Product Only) -->
+        <div class="flex items-center gap-1 pl-2 border-l border-slate-800">
+          <div class="inline-flex p-0.5 rounded-lg bg-slate-950/80 border border-slate-800 text-[10px] font-mono shadow-inner">
+            <button id="btn-view-carton-solid" class="px-2 py-1 rounded text-slate-400 hover:text-white transition-all flex items-center gap-1" data-i18n-title="viewSolidTitle" title="Solid Sealed Box (الكرتونة مغلقة بالكامل)">
+              <i data-lucide="package" class="w-3.5 h-3.5 text-amber-500"></i>
+              <span class="hidden md:inline" data-i18n="viewSolidBtn">Box Only</span>
+            </button>
+            <button id="btn-view-carton-xray" class="px-2 py-1 rounded bg-cyan-500/20 text-cyan-400 font-bold border border-cyan-500/40 transition-all flex items-center gap-1" data-i18n-title="viewXrayTitle" title="X-Ray See-Through (رؤية المنتج داخل الكرتونة)">
+              <i data-lucide="eye" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span class="hidden md:inline" data-i18n="viewXrayBtn">X-Ray (Inside)</span>
+            </button>
+            <button id="btn-view-carton-product" class="px-2 py-1 rounded text-slate-400 hover:text-white transition-all flex items-center gap-1" data-i18n-title="viewProductTitle" title="Product & Buffers Only (المنتج والمصدات فقط)">
+              <i data-lucide="shield" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span class="hidden md:inline" data-i18n="viewProductBtn">Product Only</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Exploded View Slider -->
+        <div class="flex items-center gap-2 pl-2 border-l border-slate-800">
+          <span class="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+            <i data-lucide="maximize-2" class="w-3 h-3 text-cyan-400"></i>
+            <span data-i18n="explodeLabel">Explode:</span>
+          </span>
+          <input type="range" id="slider-exploded" min="0" max="100" value="0" class="w-20">
+          <span id="exploded-val-label" class="text-[10px] font-mono text-cyan-400 w-7 text-right">0%</span>
+        </div>
+      </div>
+
+      <!-- Enhanced Floating Drop-Test Controls Dock (Bottom Center of Viewport) -->
+      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-[96%] max-w-2xl p-3.5 rounded-xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-2xl space-y-2.5">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <span class="text-slate-300 font-bold flex items-center gap-1.5">
+            <i data-lucide="activity" class="w-4 h-4 text-red-400"></i>
+            <span data-i18n="dropTitle">Physical Drop-Test Simulation Engine</span>
+          </span>
+          <div class="flex items-center gap-2">
+            <!-- Replay Button -->
+            <button id="btn-replay-drop" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-[10px] flex items-center gap-1 transition-colors" title="Replay Last Drop">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+              <span data-i18n="replayBtn">Replay</span>
+            </button>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800/60" data-i18n="dropStandard">ASTM D5276 / ISTA-1A</span>
+          </div>
+        </div>
+
+        <!-- Row 1: Drop Height & Impact Angle -->
+        <div class="grid grid-cols-12 gap-2 items-center">
+          <!-- Drop Height -->
+          <div class="col-span-4 flex items-center gap-1">
+            <span class="text-[10px] text-slate-400 font-mono" data-i18n="dropHeight">Height:</span>
+            <div class="flex rounded-md bg-slate-950 p-0.5 border border-slate-800 w-full">
+              <button data-drop-height="0.5" class="flex-1 py-1 text-[10px] font-mono rounded text-slate-400 hover:text-white transition-colors">0.5m</button>
+              <button data-drop-height="1.0" class="flex-1 py-1 text-[10px] font-mono rounded bg-cyan-600 text-white font-bold transition-colors">1.0m</button>
+              <button data-drop-height="1.5" class="flex-1 py-1 text-[10px] font-mono rounded text-slate-400 hover:text-white transition-colors">1.5m</button>
+            </div>
+          </div>
+
+          <!-- Impact Angle -->
+          <div class="col-span-5 flex items-center gap-1">
+            <span class="text-[10px] text-slate-400 font-mono" data-i18n="dropAngle">Angle:</span>
+            <div class="flex rounded-md bg-slate-950 p-0.5 border border-slate-800 w-full">
+              <button data-impact-angle="flat" class="flex-1 py-1 text-[10px] font-mono rounded text-slate-400 hover:text-white transition-colors" data-i18n="angleFlat">Flat</button>
+              <button data-impact-angle="corner" class="flex-1 py-1 text-[10px] font-mono rounded bg-cyan-600 text-white font-bold transition-colors" data-i18n="angleCorner">45° Corner</button>
+              <button data-impact-angle="edge" class="flex-1 py-1 text-[10px] font-mono rounded text-slate-400 hover:text-white transition-colors" data-i18n="angleEdge">Edge</button>
+            </div>
+          </div>
+
+          <!-- Trigger Drop Buttons -->
+          <div class="col-span-3 flex items-center gap-1.5">
+            <button id="btn-simulate-drop" class="flex-1 py-2 px-2.5 rounded-lg bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-bold text-xs font-mono uppercase tracking-wide flex items-center justify-center gap-1 shadow-lg shadow-red-600/30 transition-all active:scale-95">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
+              <span data-i18n="simulateDropBtn">Drop</span>
+            </button>
+            <button id="btn-destructive-drop" class="py-2 px-2 rounded-lg bg-red-950/80 hover:bg-red-900 border border-red-600/60 text-red-300 font-mono text-[11px] font-bold flex items-center gap-1 transition-all" title="Trigger Severe Destructive Impact to Observe Material Shatter & Breaking">
+              <i data-lucide="hammer" class="w-3.5 h-3.5 text-red-400"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 border-t border-slate-800 pt-2">
+          <button id="btn-run-full-suite" class="flex-1 rounded-md border border-cyan-600/70 bg-cyan-950/50 px-3 py-2 text-[11px] font-bold text-cyan-200 hover:bg-cyan-900/60">
+            <span data-i18n="runFullSuite">Run all package tests &amp; create final report</span>
+          </button>
+          <span id="full-suite-status" class="text-[10px] text-slate-400"></span>
+        </div>
+
+        <!-- Row 2: High-Speed Phantom Camera Playback Speed Controls -->
+        <div class="flex items-center justify-between pt-1 border-t border-slate-800/80 text-[10px] font-mono text-slate-400">
+          <span class="flex items-center gap-1 text-slate-300">
+            <i data-lucide="camera" class="w-3.5 h-3.5 text-purple-400"></i>
+            <span data-i18n="simSpeed">Playback Speed:</span>
+          </span>
+          <div class="flex items-center gap-1 bg-slate-950 p-0.5 rounded border border-slate-800">
+            <button data-sim-speed="1.0" class="px-2 py-0.5 rounded bg-purple-600 text-white font-bold transition-colors" data-i18n="speedRealtime">1.0x Realtime</button>
+            <button data-sim-speed="0.25" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition-colors" data-i18n="speedSlowMo">0.25x Slow-Mo</button>
+            <button data-sim-speed="0.1" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition-colors" data-i18n="speedUltraSlow">0.1x Ultra-Slow</button>
+            <button data-sim-speed="0.05" class="px-2 py-0.5 rounded text-slate-400 hover:text-amber-300 transition-colors" data-i18n="speedPhantom">0.05x Phantom</button>
+          </div>
+        </div>
+
+        <!-- Row 3: Interactive LS-DYNA Simulation Timeline Scrubber -->
+        <div class="pt-2 border-t border-slate-800/80 space-y-1">
+          <div class="flex items-center justify-between text-[10px] font-mono">
+            <span class="text-slate-300 font-semibold flex items-center gap-1">
+              <i data-lucide="sliders" class="w-3 h-3 text-cyan-400"></i>
+              <span data-i18n="timelineTitle">LS-DYNA Impact Timeline:</span>
+            </span>
+            <div class="flex items-center gap-2">
+              <span id="sim-timeline-stage" class="text-amber-400 font-bold text-[9px] px-1.5 py-0.2 rounded bg-amber-950/60 border border-amber-800/50">Ready</span>
+              <span id="sim-timeline-ms" class="text-cyan-400 font-bold">0.0 ms</span>
+            </div>
+          </div>
+          <input type="range" id="slider-sim-timeline" min="0" max="100" value="0" class="w-full h-1.5 cursor-pointer accent-cyan-400">
+          <div class="flex justify-between text-[8px] font-mono text-slate-500 px-0.5">
+            <span data-i18n="stageApex">0ms Apex</span>
+            <span data-i18n="stageFreefall">220ms Fall</span>
+            <span data-i18n="stagePeakG">280ms Crush</span>
+            <span data-i18n="stageSlapDown">340ms Slap</span>
+            <span data-i18n="stageSettle">500ms Rest</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===================================================== -->
+    <!-- 3. RIGHT SIDEBAR: REAL-TIME TELEMETRY, ROI & DIELINE -->
+    <!-- ===================================================== -->
+    <aside class="col-span-12 lg:col-span-3 bg-[#0a101c]/95 border-l border-slate-800/80 flex flex-col h-full overflow-y-auto p-4 z-20 space-y-4 shadow-xl">
+      
+      <!-- Section Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <span class="text-xs font-semibold text-slate-300 tracking-wide uppercase font-mono flex items-center gap-1.5">
+          <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span data-i18n="telemetryTitle">Engineering Telemetry</span>
+        </span>
+        <span class="text-[10px] text-emerald-400 font-mono" data-i18n="telemetrySub">Live FEA Model</span>
+      </div>
+
+      <!-- Analog Accelerometer Gauge -->
+      <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 space-y-1.5">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <span class="text-slate-300 font-semibold flex items-center gap-1.5">
+            <i data-lucide="gauge" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span data-i18n="analogGaugeTitle">Dynamic Accelerometer</span>
+          </span>
+          <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-950 text-cyan-300 border border-cyan-800/40 font-mono">G-LOAD</span>
+        </div>
+        <div class="w-full h-24 rounded bg-[#0b1120] border border-slate-800/80 overflow-hidden flex items-center justify-center relative">
+          <canvas id="analog-gauge-canvas" width="280" height="96" class="w-full h-full block"></canvas>
+        </div>
+      </div>
+
+      <!-- Deceleration Shock Pulse Oscilloscope Graph -->
+      <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <span class="text-slate-300" data-i18n="profileTitle">Dual-Trace Deceleration Profile</span>
+          <span class="text-[10px] text-cyan-400" data-i18n="profileSub">G &amp; Energy (J) vs Time</span>
+        </div>
+        <div class="w-full h-32 rounded bg-[#0b1120] border border-slate-800 overflow-hidden relative">
+          <canvas id="oscilloscope-canvas" width="340" height="128" class="w-full h-full block"></canvas>
+        </div>
+      </div>
+
+      <!-- Simulation Telemetry Metrics Cards -->
+      <div class="grid grid-cols-2 gap-2">
+        <!-- Peak G-Force Card -->
+        <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+          <span class="text-[10px] text-slate-400 font-mono block" data-i18n="peakForceLabel">Peak Impact Force:</span>
+          <span id="telemetry-peak-g" class="text-lg font-mono font-bold text-emerald-400 mt-0.5 block">24.2 G</span>
+          <span id="telemetry-safe-g" class="text-[9px] text-slate-500 font-mono block">Limit: 30.0 G</span>
+        </div>
+
+        <!-- Dynamic Cushion Displacement -->
+        <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+          <span class="text-[10px] text-slate-400 font-mono block" data-i18n="compressionLabel">Buffer Compression:</span>
+          <span id="telemetry-displacement" class="text-lg font-mono font-bold text-cyan-400 mt-0.5 block">28.5 mm</span>
+          <span class="text-[9px] text-slate-500 font-mono block" data-i18n="crushType">Progressive Crush</span>
+        </div>
+      </div>
+
+      <!-- Impact Energy Dissipation -->
+      <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between font-mono text-xs">
+        <span class="text-slate-400" data-i18n="energyLabel">Energy Dissipated:</span>
+        <span id="telemetry-energy" class="text-amber-400 font-bold">125.1 J (88% absorbed)</span>
+      </div>
+
+      <!-- Structural Safety Status Badge -->
+      <div class="text-center py-1">
+        <span id="telemetry-status-badge" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-lg shadow-emerald-950/40">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span data-i18n="statusSafe">PASSED — APPLIANCE SAFE (ISTA-1A)</span>
+        </span>
+      </div>
+
+      <!-- Real-Time Damage & Fracture Inspector Card -->
+      <div class="p-3 rounded-lg bg-slate-900/90 border border-slate-800 space-y-2.5">
+        <div class="flex items-center justify-between font-mono text-xs border-b border-slate-800 pb-1.5">
+          <span class="text-slate-300 font-bold flex items-center gap-1.5">
+            <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span data-i18n="damageInspectorTitle">Damage &amp; Fracture Inspector</span>
+          </span>
+          <button id="btn-reset-debris" class="text-[9px] text-cyan-400 hover:text-cyan-300 transition-colors" data-i18n="resetDebrisBtn">Reset Shards</button>
+        </div>
+
+        <!-- Structural Integrity Bar -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-[10px] font-mono">
+            <span class="text-slate-400" data-i18n="integrityLabel">Structural Integrity:</span>
+            <span id="telemetry-integrity-val" class="font-bold text-emerald-400">100%</span>
+          </div>
+          <div class="w-full h-1.5 rounded-full bg-slate-950 overflow-hidden">
+            <div id="telemetry-integrity-bar" class="h-full bg-emerald-500 transition-all" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- Failure Status & Debris Ejected -->
+        <div class="flex items-center justify-between text-[11px] font-mono">
+          <span id="telemetry-fracture-status" class="text-emerald-400 font-bold">100% Protected (Zero Fracture)</span>
+          <span id="telemetry-debris-count" class="text-slate-400 text-[10px]">0 fragments</span>
+        </div>
+
+        <!-- Enclosure Failure Assessment -->
+        <div class="flex items-center justify-between text-[10px] font-mono border-t border-slate-800/60 pt-1.5">
+          <span class="text-slate-400" data-i18n="enclosureDamageLabel">Enclosure Failure:</span>
+          <span id="telemetry-enclosure-failure" class="font-bold text-emerald-400 truncate max-w-[170px]">Safe (No Damage)</span>
+        </div>
+
+        <!-- Component Damage Breakdown Section -->
+        <div class="space-y-1.5 border-t border-slate-800/80 pt-2">
+          <div class="flex items-center justify-between text-[10px] font-mono">
+            <span class="text-slate-300 font-bold flex items-center gap-1">
+              <i data-lucide="cpu" class="w-3 h-3 text-cyan-400"></i>
+              <span data-i18n="compDamageTitle">Component Damage Breakdown:</span>
+            </span>
+            <button id="btn-toggle-damage-pins" class="text-[9px] text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/60" title="Toggle 3D Viewport Damage Pins">
+              <i data-lucide="map-pin" class="w-2.5 h-2.5"></i>
+              <span data-i18n="togglePinsBtn">3D Callouts</span>
+            </button>
+          </div>
+          <!-- Dynamic List of Component Health -->
+          <div id="component-damage-list" class="space-y-1 font-mono text-[10px]">
+            <!-- Rendered dynamically per preset & test -->
+          </div>
+        </div>
+
+        <!-- Failure Root-Cause & Impact Patch Inspector -->
+        <div id="failure-root-cause-box" class="p-2 rounded bg-slate-950/80 border border-amber-900/40 text-[10px] font-mono space-y-1">
+          <div class="flex items-center justify-between text-amber-300 font-bold border-b border-slate-800 pb-1">
+            <span class="flex items-center gap-1">
+              <i data-lucide="crosshair" class="w-3 h-3 text-red-400"></i>
+              <span data-i18n="rootCauseTitle">Impact Failure Origin & Root Cause</span>
+            </span>
+            <span id="root-cause-severity-badge" class="px-1.5 py-0.2 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[9px]">CRITICAL</span>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span data-i18n="impactZoneLabel">Impact Zone:</span>
+            <span id="root-cause-zone" class="text-white font-bold">Bottom-Right Corner Buffer</span>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span data-i18n="cushionFailLabel">Cushion State:</span>
+            <span id="root-cause-cushion-state" class="text-red-300 font-bold">Bottomed Out (Deform: 85%)</span>
+          </div>
+          <div class="pt-0.5 border-t border-slate-800/60 text-slate-300">
+            <span class="text-amber-400 font-bold" data-i18n="engineeringFixLabel">Engineering Patch:</span>
+            <p id="root-cause-patch-text" class="text-[9px] text-slate-400 leading-tight mt-0.5">
+              Switch to 15mm Honeycomb Cardboard to increase dynamic crush distance by +22mm, reducing peak shock below 30G.
+            </p>
+            <button id="btn-apply-cushion-patch" class="mt-1.5 w-full py-1 px-2 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[9px] font-bold flex items-center justify-center gap-1.5 transition-all">
+              <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i>
+              <span data-i18n="applyPatchBtn">Apply Engineering Honeycomb Patch</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Frame-by-Frame Fracture Scrubbing Slider -->
+        <div class="pt-1 border-t border-slate-800/80 space-y-1">
+          <div class="flex justify-between text-[10px] font-mono text-slate-400">
+            <span data-i18n="crackScrubLabel">Scrub Crack Evolution:</span>
+            <span id="fracture-scrub-val" class="text-cyan-400">100%</span>
+          </div>
+          <input type="range" id="slider-fracture-scrub" min="0" max="100" value="100">
+        </div>
+      </div>
+
+      <!-- Section: Circular Economy & Elaraby ROI Calculator -->
+      <div class="space-y-2 pt-2 border-t border-slate-800">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-300 tracking-wide uppercase font-mono flex items-center gap-1.5">
+            <i data-lucide="calculator" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span data-i18n="roiTitle">Elaraby Factory ROI &amp; ESG</span>
+          </span>
+          <span id="roi-status-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span data-i18n="roiAwaitingBadge">Awaiting API Access</span>
+          </span>
+        </div>
+
+        <!-- Annual Factory Financial Savings (EGP) -->
+        <div id="roi-savings-card" class="p-3 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 transition-all">
+          <span class="text-[10px] text-slate-400 font-mono uppercase tracking-wider block" data-i18n="annualSavingsLabel">Projected Annual Cost Saved:</span>
+          <span id="roi-annual-savings" class="text-2xl font-mono font-bold text-slate-400 tracking-tight block mt-0.5">0.00 EGP</span>
+          <div class="flex items-center justify-between text-[10px] text-slate-500 font-mono mt-1 pt-1 border-t border-slate-800">
+            <span><span data-i18n="unitSavedLabel">Per Unit Saved:</span> <strong id="roi-unit-saved" class="text-slate-400">0.00 EGP</strong></span>
+            <span id="roi-percent-saved" class="text-slate-500 font-bold">-- vs EPS</span>
+          </div>
+        </div>
+
+        <!-- Material & Environmental Impact Metrics -->
+        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+          <!-- Weight Reduction -->
+          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+            <span class="text-[10px] text-slate-400 block" data-i18n="massReductionLabel">Material Mass:</span>
+            <span id="roi-weight-saved" class="text-sm font-bold text-slate-400 mt-0.5 block">-- Material</span>
+            <span class="text-[9px] text-slate-500" data-i18n="lessFuel">Less shipping fuel</span>
+          </div>
+
+          <!-- Toxic EPS Eliminated -->
+          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+            <span class="text-[10px] text-slate-400 block" data-i18n="plasticCutLabel">Plastic EPS Cut:</span>
+            <span id="roi-eps-eliminated" class="text-sm font-bold text-slate-400 mt-0.5 block">0 kg</span>
+            <span class="text-[9px] text-slate-500" data-i18n="zeroLandfill">Zero toxic landfill</span>
+          </div>
+
+          <!-- Carbon Footprint Avoided -->
+          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+            <span class="text-[10px] text-slate-400 block" data-i18n="co2OffsetLabel">CO2 Offset:</span>
+            <span id="roi-co2-avoided" class="text-sm font-bold text-slate-400 mt-0.5 block">0 Tons CO2e</span>
+            <span id="roi-trees-planted" class="text-[9px] text-slate-500" data-i18n="roiAwaitingData">Awaiting line feed</span>
+          </div>
+
+          <!-- Circularity Score -->
+          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+            <span class="text-[10px] text-slate-400 block" data-i18n="circScoreLabel">Circularity Index:</span>
+            <span id="roi-circular-score" class="text-sm font-bold text-emerald-400 mt-0.5 block">98/100</span>
+            <span class="text-[9px] text-slate-500" data-i18n="repulpable">100% Repulpable</span>
+          </div>
+        </div>
+
+        <!-- Shipping & Logistics Container Optimization -->
+        <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 text-xs font-mono flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-slate-400 block" data-i18n="logisticsLabel">Logistics Fleet Boost:</span>
+            <strong id="roi-logistics-val" class="text-slate-400 text-xs" data-i18n="logisticsStandby">Awaiting Factory Dispatch Data</strong>
+          </div>
+          <i data-lucide="truck" class="w-5 h-5 text-slate-500"></i>
+        </div>
+
+        <!-- Pitch Action: Connect / Zero Out Toggle Button -->
+        <div class="pt-1">
+          <button id="btn-toggle-erp-sync" class="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-amber-600/30 to-amber-700/20 hover:from-amber-600/40 hover:to-amber-700/30 border border-amber-500/50 text-amber-300 font-mono text-[11px] font-bold flex items-center justify-center gap-2 transition-all shadow-sm">
+            <i data-lucide="plug-zap" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="btn-toggle-erp-label" data-i18n="connectFactoryBtn">🔌 Simulate Elaraby ERP API Sync</span>
+          </button>
+          <p class="text-[9px] text-center text-slate-500 font-mono mt-1" id="erp-sync-note" data-i18n="erpSyncNote">
+            Default: Standby (0) • Live sync upon Elaraby MES / SAP data clearance
+          </p>
+        </div>
+      </div>
+
+      <!-- Factory Specification Compliance Box -->
+      <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80 text-[10px] text-slate-400 font-mono space-y-1">
+        <div class="text-slate-300 font-bold flex items-center gap-1">
+          <i data-lucide="check-circle" class="w-3 h-3 text-cyan-400"></i>
+          <span data-i18n="regulatoryTitle">Egyptian &amp; EU Regulatory Alignment</span>
+        </div>
+        <p data-i18n="reg1">• Meets EU Packaging &amp; Packaging Waste Directive (PPWR 2025).</p>
+        <p data-i18n="reg2">• Compatible with Quesna &amp; Benha Elaraby automated packing lines.</p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- MODAL: 3D MODEL UPLOAD (OBJ / STL / GLTF)   -->
+  <!-- ============================================ -->
+  <div id="modal-upload-model" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-xl bg-[#090f1a] border border-blue-500/40 rounded-xl shadow-2xl overflow-hidden flex flex-col">
+      <!-- Header -->
+      <div class="h-12 bg-slate-900 px-4 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="upload-cloud" class="w-4 h-4 text-cyan-400"></i>
+          <span class="font-bold text-xs font-mono text-slate-200" data-i18n="uploadModalTitle">Ingest 3D CAD Appliance Model (OBJ / STL / GLTF)</span>
+        </div>
+        <button id="btn-close-upload" class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <!-- Project Mass & Fragility Configuration -->
+        <div class="grid grid-cols-2 gap-3 p-3 rounded-lg bg-slate-900/80 border border-slate-800 font-mono text-xs">
+          <div>
+            <label class="block text-[11px] text-slate-300 font-semibold mb-1" data-i18n="uploadMassLabel">Project Mass (كتلة المنتج):</label>
+            <div class="flex items-center gap-1.5">
+              <input type="number" id="upload-custom-mass" min="0.5" max="300" step="0.5" placeholder="Auto / e.g. 15.0" class="w-full px-2.5 py-1.5 rounded bg-slate-950 border border-slate-700 text-amber-400 font-bold text-xs focus:border-amber-400 focus:outline-none">
+              <span class="text-amber-400 font-bold text-xs">kg</span>
+            </div>
+            <span class="text-[9px] text-slate-500 block mt-1" data-i18n="uploadMassHelp">Enter mass or leave blank for volume estimation</span>
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-300 font-semibold mb-1" data-i18n="uploadFragilityLabel">Fragility Class (فئة الحساسية):</label>
+            <select id="upload-custom-fragility" class="w-full px-2.5 py-1.5 rounded bg-slate-950 border border-slate-700 text-slate-200 text-xs focus:border-cyan-400 focus:outline-none">
+              <option value="8.5">Ultra-Fragile (Display/OLED • 25G)</option>
+              <option value="6.5" selected>Standard Appliance (Motor/PCB • 35G)</option>
+              <option value="5.0">Rugged Industrial (Chassis • 50G)</option>
+            </select>
+            <span class="text-[9px] text-slate-500 block mt-1" data-i18n="uploadFragilityHelp">Critical G-Force threshold</span>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div id="dropzone-model-file" class="border-2 border-dashed border-slate-700 hover:border-cyan-500 rounded-xl p-6 text-center cursor-pointer transition-all bg-slate-900/40 space-y-2">
+          <i data-lucide="folder-up" class="w-10 h-10 text-cyan-400 mx-auto"></i>
+          <h4 class="font-bold text-sm text-slate-200" data-i18n="uploadDropzoneTitle">Drag &amp; Drop your 3D CAD Model Here</h4>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto" data-i18n="uploadDropzoneSub">
+            Supports .OBJ, .STL, .GLTF, .GLB from SolidWorks, Inventor, Rhino, Blender
+          </p>
+          <input type="file" id="input-model-file" accept=".obj,.stl,.gltf,.glb" class="hidden">
+          <div class="pt-2">
+            <button id="btn-browse-file" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-xs font-bold transition-colors">
+              <span data-i18n="browseFilesBtn">Browse Local CAD Files</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sample Appliance Models Option -->
+        <div class="space-y-2 pt-2 border-t border-slate-800">
+          <span class="text-xs font-mono text-slate-400 block font-semibold" data-i18n="sampleModelsTitle">Or Load Elaraby R&amp;D Sample Appliances:</span>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="btn-sample-washer" class="p-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/60 text-left transition-all font-mono">
+              <div class="flex items-center gap-1.5 text-xs font-bold text-white">
+                <span>🧺</span>
+                <span data-i18n="sampleWasher">Tornado Washing Machine 8kg</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block mt-1">600×550×850 mm • 68 kg • Drum suspension</span>
+            </button>
+
+            <button id="btn-sample-ac" class="p-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/60 text-left transition-all font-mono">
+              <div class="flex items-center gap-1.5 text-xs font-bold text-white">
+                <span>❄️</span>
+                <span data-i18n="sampleAC">Sharp Inverter AC Outdoor Unit</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block mt-1">780×290×540 mm • 32.5 kg • Heavy compressor</span>
+            </button>
+          </div>
+
+          <!-- Download All Sample CAD Files Link -->
+          <div class="pt-2 text-center border-t border-slate-800/60">
+            <a href="samples/Elaraby_Appliance_CAD_Samples.zip" download="Elaraby_Appliance_CAD_Samples.zip" class="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 hover:underline transition-colors">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span data-i18n="downloadSamplesBtn">Download Sample CAD Bundle (.ZIP)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- MODAL 1: AI GENERATIVE TOPOLOGY OPTIMIZATION -->
+  <!-- ============================================ -->
+  <div id="modal-ai-terminal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-xl bg-[#090e17] border border-cyan-500/50 rounded-xl shadow-2xl overflow-hidden relative scanline-overlay">
+      <div class="h-10 bg-slate-900 px-4 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+          <span class="font-mono text-xs font-bold text-cyan-300" data-i18n="aiModalTitle">NXTPAK AI Generative Topology Optimization Kernel</span>
+        </div>
+        <span class="font-mono text-[10px] text-slate-500">ISTA-1A / FEA Engine</span>
+      </div>
+
+      <div id="ai-log-content" class="p-5 h-72 overflow-y-auto space-y-1.5 bg-[#060a10]"></div>
+
+      <div class="h-9 bg-slate-900/90 px-4 flex items-center justify-between border-t border-slate-800 text-[10px] font-mono text-slate-400">
+        <span data-i18n="aiModalFooter">Processing Finite Element Stress Concentration &amp; Origami Nodes</span>
+        <span class="text-cyan-400" data-i18n="aiModalLocation">Elaraby R&amp;D Complex</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 2: 2D UNFOLDED DIELINE CAD BLUEPRINT SVG -->
+  <!-- ============================================== -->
+  <div id="modal-dieline" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-5xl h-[85vh] bg-[#090f1a] border border-slate-700 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+      <div class="h-12 bg-slate-900 px-4 flex items-center justify-between border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
+          <span class="font-bold text-xs font-mono text-slate-200" data-i18n="dielineModalTitle">2D Unfolded Cut &amp; Crease Dieline (Zünd / Kongsberg CNC Spec)</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btn-download-dieline" class="px-3 py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-xs flex items-center gap-1.5 transition-colors">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span data-i18n="exportDxfSvg">Export SVG / DXF</span>
+          </button>
+          <button id="btn-close-dieline" class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="dieline-svg-container" class="flex-1 w-full h-full overflow-hidden relative bg-[#070b12]"></div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 3: AR & FACTORY FLOOR INSPECTION (WEBXR & QR CODE) -->
+  <!-- ======================================================== -->
+  <div id="modal-ar" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-[#0d1522] border border-emerald-500/40 rounded-xl shadow-2xl overflow-hidden">
+      <div class="h-12 bg-slate-900 px-4 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="view" class="w-4 h-4 text-emerald-400"></i>
+          <span class="font-bold text-xs font-mono text-slate-200" data-i18n="arModalTitle">Augmented Reality &amp; Factory Floor Inspection</span>
+        </div>
+        <button id="btn-close-ar" class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="text-center space-y-1">
+          <h4 class="font-bold text-sm text-slate-200" data-i18n="arModalSub">Inspect 1:1 Scale Digital Twin on Elaraby Assembly Line</h4>
+          <p class="text-xs text-slate-400" data-i18n="scanQRText">Scan with smartphone camera to view 1:1 scale 3D package in AR:</p>
+        </div>
+
+        <div class="flex justify-center" id="ar-qr-container"></div>
+
+        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800 text-xs font-mono text-center text-slate-400 space-y-1">
+          <span class="text-emerald-400 font-bold block">WebXR &amp; Apple AR QuickLook Ready</span>
+          <span class="text-[10px]">Zero app installation required • Works natively in iOS Safari &amp; Android Chrome</span>
+        </div>
+
+        <button id="btn-toggle-conveyor" class="w-full py-2.5 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-mono text-xs flex items-center justify-center gap-2 transition-colors">
+          <i data-lucide="conveyor-belt" class="w-4 h-4 text-amber-400"></i>
+          <span data-i18n="arSimulateBtn">Toggle Simulated Factory Conveyor Environment</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 4: LIVE A/B COMPARATIVE BENCHMARK (EPS VS HONEYCOMB) -->
+  <!-- ======================================================== -->
+  <div id="modal-benchmark" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-[#090f1a] border border-amber-500/40 rounded-xl shadow-2xl overflow-hidden flex flex-col">
+      <div class="h-12 bg-slate-900 px-4 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="split" class="w-4 h-4 text-amber-400"></i>
+          <span class="font-bold text-xs font-mono text-slate-200" data-i18n="compareModalTitle">Live A/B Impact Benchmark: Toxic EPS vs. NXTPAK Honeycomb Cardboard</span>
+        </div>
+        <button id="btn-close-benchmark" class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-300">Simultaneous Shock Deceleration Response (1.0m ISTA-1A Drop)</span>
+            <div class="flex items-center gap-3 text-[10px]">
+              <span class="text-red-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400"></span> Old EPS Styrofoam</span>
+              <span class="text-emerald-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> NXTPAK Honeycomb</span>
+            </div>
+          </div>
+          <div class="w-full h-44 rounded-lg bg-[#080d16] border border-slate-800 overflow-hidden">
+            <canvas id="benchmark-canvas" width="700" height="176" class="w-full h-full block"></canvas>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-4 rounded-lg bg-red-950/20 border border-red-500/30 space-y-2 font-mono text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-red-400">Traditional EPS Styrofoam</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-red-500/30 text-red-300 font-bold">FAILS DROP TEST</span>
+            </div>
+            <div class="text-2xl font-bold text-red-400" id="bench-eps-g">54.8 G</div>
+            <p class="text-[11px] text-slate-400 leading-relaxed" data-i18n="epsFailureAlert">
+              EPS Styrofoam experiences brittle fracture &amp; transmits 54.8G destructive shock.
+            </p>
+            <div class="text-[10px] text-slate-500 pt-2 border-t border-red-900/40">
+              Landfill: 500+ Years • Recyclability: 0% in Egypt
+            </div>
+          </div>
+
+          <div class="p-4 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-2 font-mono text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-emerald-400">NXTPAK Honeycomb Cardboard</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 font-bold">PASSED SAFE</span>
+            </div>
+            <div class="text-2xl font-bold text-emerald-400" id="bench-honey-g">24.2 G</div>
+            <p class="text-[11px] text-slate-400 leading-relaxed" data-i18n="honeycombSuccessAlert">
+              NXTPAK Honeycomb undergoes progressive cell buckling, dampening shock to 24.2G safe limit.
+            </p>
+            <div class="text-[10px] text-slate-500 pt-2 border-t border-emerald-900/40">
+              Landfill: 0 Years • 100% Repulpable in Egypt Paper Mills
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs font-mono">
+          <div>
+            <span class="text-slate-400">G-Force Shock Reduction:</span>
+            <strong class="text-emerald-400 block text-sm" id="bench-shock-reduction">-56% Shock Absorbed</strong>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-400">Annual Factory Savings (100k units):</span>
+            <strong class="text-emerald-400 block text-sm" id="bench-annual-saved">3,850,000 EGP</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 5: PRINTABLE ELARABY FACTORY ENGINEERING REPORT   -->
+  <!-- ======================================================== -->
+  <div id="modal-report" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-4xl max-h-[90vh] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+      <div class="h-12 bg-slate-900 px-4 flex items-center justify-between border-b border-slate-800 shrink-0">
+        <span class="font-bold text-xs font-mono text-slate-200" data-i18n="reportModalTitle">Product Test Report &amp; Packaging Specification</span>
+        <div class="flex items-center gap-2">
+          <button id="btn-print-report" class="px-3 py-1.5 rounded bg-sky-600 hover:bg-sky-500 text-white font-mono text-xs flex items-center gap-1.5 transition-colors">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span data-i18n="printReportBtn">Print / Save PDF</span>
+          </button>
+          <button id="btn-close-report" class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="report-content-container" class="flex-1 overflow-y-auto p-4 bg-slate-950"></div>
+    </div>
+  </div>
+
+  <!-- Main Application Script (ES Module) -->
+  <script type="module" src="js/app.js"></script>
+
+  <!-- Lucide Icons Initialization -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

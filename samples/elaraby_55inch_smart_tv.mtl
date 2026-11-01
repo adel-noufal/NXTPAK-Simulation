@@ -1,0 +1,24 @@
+# Material Library for Elaraby 55-Inch Smart TV
+newmtl TV_Screen_Glass
+Ka 0.05 0.10 0.18
+Kd 0.08 0.18 0.32
+Ks 0.80 0.80 0.80
+Ns 120.0
+d 0.85
+illum 2
+
+newmtl TV_Black_Bezel
+Ka 0.1 0.1 0.1
+Kd 0.12 0.12 0.14
+Ks 0.2 0.2 0.2
+Ns 30.0
+d 1.0
+illum 2
+
+newmtl TV_Stand_Aluminum
+Ka 0.2 0.2 0.2
+Kd 0.75 0.78 0.82
+Ks 0.6 0.6 0.6
+Ns 80.0
+d 1.0
+illum 2
